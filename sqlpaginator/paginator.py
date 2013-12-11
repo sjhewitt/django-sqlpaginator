@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class SqlPaginator(object):
 
     def __init__(self, initial_sql, model, order_by='id', page=1,
-                count=None, per_page=10, direction='asc'):
+                count=None, per_page=10, direction='asc', params=None):
 
         # if these are not an int then fail
         self.page_num = int(page)
@@ -29,6 +29,7 @@ class SqlPaginator(object):
 
         # need the model class to do some sql validation
         self.model = model
+        self.params = params or []
 
         self._num_pages = None
         self.orphans = 0
@@ -73,7 +74,7 @@ class SqlPaginator(object):
                 break
 
         if not found:
-              tlist.insert_before(from_token, sql.Token(tokens.DML, ",%s " % order_by))
+            tlist.insert_before(from_token, sql.Token(tokens.DML, ",%s " % order_by))
 
         self.initial_sql = tlist.to_unicode()
 
@@ -148,7 +149,7 @@ class SqlPaginator(object):
         sql = self._tsql % self.d
         logger.debug("sql: %s" % sql)
 
-        self.object_list = list(self.model.objects.raw(sql))
+        self.object_list = list(self.model.objects.raw(sql, self.params))
 
         return Page(self.object_list, number, self)
 
