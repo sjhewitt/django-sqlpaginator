@@ -44,13 +44,6 @@ class SqlPaginator(object):
 
         self._db_table = self.model._meta.db_table
 
-        # validate sql fields
-        if order_by not in self._model_fields:
-            raise ValueError("%s is not a valid column in %s" % (order_by, self._db_table))
-        
-        # sometimes its really a foreign key, so get the real colum name
-        order_by = self.model._meta.get_field(order_by).column
-
         self.order_by = order_by
 
         self.direction = direction
@@ -59,7 +52,7 @@ class SqlPaginator(object):
 
         # order_by queries work differently when using select distinct queries
         # maybe i should use a sql parser ?
-        self._tsql = '%(sql)s order by "%(order_by)s" %(direction)s limit %(limit)d offset %(offset)d'
+        self._tsql = '%(sql)s order by %(order_by)s %(direction)s limit %(limit)d offset %(offset)d'
 
         # get the token list from the query, there will be only one
         tlist = sqlparse.parse(initial_sql)[0]
